@@ -120,7 +120,7 @@ class CompanyController extends Controller
     public function destroy($company)
     {
         $company = Company::where('ruc', $company)
-            ->where('user_id', auth()->user()->id)
+            ->where('user_id', JWTAuth::user()->id)
             ->firstOrFail();
         
         $company->delete();
