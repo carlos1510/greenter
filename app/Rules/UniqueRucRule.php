@@ -5,6 +5,7 @@ namespace App\Rules;
 use App\Models\Company;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UniqueRucRule implements ValidationRule
 {
