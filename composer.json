@@ -11,6 +11,7 @@
         "greenter/report": "^5.1",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "luecano/numero-a-letras": "^4.0",
         "tymon/jwt-auth": "^2.2"
     },
     "require-dev": {
