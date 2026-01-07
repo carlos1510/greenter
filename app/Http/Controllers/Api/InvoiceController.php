@@ -99,6 +99,8 @@ class InvoiceController extends Controller
 
         $invoice = $sunat->getInvoice($data);
 
+        $sunat->generatePdfReport($invoice);
+
         return $sunat->getHtmlReport($invoice);
     }
 

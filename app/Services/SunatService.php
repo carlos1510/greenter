@@ -15,6 +15,7 @@ use Greenter\Model\Company\Company;
 use Greenter\Model\Sale\Legend;
 use Greenter\Model\Sale\SaleDetail;
 use Greenter\Report\HtmlReport;
+use Greenter\Report\PdfReport;
 use Greenter\Report\Resolver\DefaultTemplateResolver;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -189,5 +190,49 @@ class SunatService
         ];
 
         return $report->render($invoice, $params);
+    }
+
+    public function generatePdfReport($invoice) {
+        $htmlReport = new HtmlReport();
+
+        $resolver = new DefaultTemplateResolver();
+
+        $htmlReport->setTemplate($resolver->getTemplate($invoice));
+
+        $ruc = $invoice->getCompany()->getRuc();
+        $company = ModelsCompany::where('ruc', $ruc)
+            ->where('user_id', JWTAuth::user()->id)
+            ->first();
+
+        $report = new PdfReport($htmlReport);
+
+        $report->setOptions( [
+            'no-outline',
+            'viewport-size' => '1280x1024',
+            'page-width' => '21cm',
+            'page-height' => '29.7cm',
+        ]);
+
+        $report->setBinPath(env('WKHTMLTOPDF_PATH'));
+
+        $params = [
+            'system' => [
+                'logo' => Storage::get($company->logo_path), // Logo de Empresa
+                'hash' => 'qqnr2dN4p/HmaEA/CJuVGo7dv5g=', // Valor Resumen 
+            ],
+            'user' => [
+                'header'     => 'Telf: <b>(01) 123375</b>', // Texto que se ubica debajo de la dirección de empresa
+                'extras'     => [
+                    // Leyendas adicionales
+                    ['name' => 'CONDICION DE PAGO', 'value' => 'Efectivo'     ],
+                    ['name' => 'VENDEDOR'         , 'value' => 'GITHUB SELLER'],
+                ],
+                'footer' => '<p>Nro Resolucion: <b>3232323</b></p>'
+            ]
+        ];
+
+        $pdf = $report->render($invoice, $params);
+
+        Storage::put('invoices/' . $invoice->getName() . '.pdf', $pdf);
     }
 }

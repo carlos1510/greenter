@@ -65,3 +65,7 @@ https://greenter.dev/ -> facturación electronica
 ```bash
     composer require greenter/report
 ```
+
+### Para descargar o visualizar el pdf generado se requiere la instalacion del siguiente programa, el cual se encuentra en la documentacion de greenter
+
+https://wkhtmltopdf.org/downloads.html
