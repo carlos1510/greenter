@@ -52,6 +52,7 @@ class SunatService
             //Impuestos
             ->setMtoIGV($data['mtoIGV'])
             ->setMtoIGVGratuitas($data['mtoIGVGratuitas'])
+            ->setIcbper($data['icbper'])
             ->setTotalImpuestos($data['totalImpuestos'])
 
             //Totales
@@ -107,6 +108,8 @@ class SunatService
                 ->setMtoBaseIgv($detail['mtoBaseIgv'])
                 ->setPorcentajeIgv($detail['porcentajeIgv'])
                 ->setIgv($detail['igv'])
+                ->setFactorIcbper($detail['factorIcbper'] ?? null)
+                ->setIcbper($detail['icbper'] ?? null)
                 ->setTotalImpuestos($detail['totalImpuestos'])
                 ->setMtoValorVenta($detail['mtoValorVenta'])
                 ->setMtoPrecioUnitario($detail['mtoPrecioUnitario']);
