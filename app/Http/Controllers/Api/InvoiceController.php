@@ -31,8 +31,6 @@ class InvoiceController extends Controller
 
         $this->setTotales($data);
         $this->setLegends($data);
-
-        //return $data;
         
         $sunat = new SunatService();
 
@@ -76,6 +74,32 @@ class InvoiceController extends Controller
         $response['hash'] = (new XmlUtils())->getHashSign($response['xml']);
 
         return response()->json($response, 200);
+    }
+
+    public function pdf(Request $request)
+    {
+        $request->validate([
+            'company' => 'required|array',
+            'company.address' => 'required|array',
+            'client' => 'required|array',
+            'details' => 'required|array',
+            'details.*' => 'required|array',
+        ]);
+
+        $data = $request->all();
+        
+        /*$company = Company::where('user_id', JWTAuth::user()->id)
+            ->where('ruc', $data['company']['ruc'])
+            ->firstOrFail();*/
+
+        $this->setTotales($data);
+        $this->setLegends($data);
+
+        $sunat = new SunatService();
+
+        $invoice = $sunat->getInvoice($data);
+
+        return $sunat->getHtmlReport($invoice);
     }
 
     public function setTotales(&$data) {

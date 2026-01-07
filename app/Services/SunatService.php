@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Company as ModelsCompany;
 use Greenter\Model\Sale\Invoice;
 use Greenter\See;
 use Illuminate\Support\Facades\Storage;
@@ -13,6 +14,9 @@ use Greenter\Model\Company\Address;
 use Greenter\Model\Company\Company;
 use Greenter\Model\Sale\Legend;
 use Greenter\Model\Sale\SaleDetail;
+use Greenter\Report\HtmlReport;
+use Greenter\Report\Resolver\DefaultTemplateResolver;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class SunatService
 {
@@ -130,6 +134,7 @@ class SunatService
         return $green_legends;
     }
 
+    //Response y reporte
     public function sunatResponse($result) {
         $response['success'] = $result->isSuccess();
         // Verificamos que la conexión con SUNAT fue exitosa.
@@ -153,5 +158,36 @@ class SunatService
         ];
 
         return $response;
+    }
+
+    public function getHtmlReport($invoice){
+        $report = new HtmlReport();
+
+        $resolver = new DefaultTemplateResolver();
+
+        $report->setTemplate($resolver->getTemplate($invoice));
+
+        $ruc = $invoice->getCompany()->getRuc();
+        $company = ModelsCompany::where('ruc', $ruc)
+            ->where('user_id', JWTAuth::user()->id)
+            ->first();
+
+        $params = [
+            'system' => [
+                'logo' => Storage::get($company->logo_path), // Logo de Empresa
+                'hash' => 'qqnr2dN4p/HmaEA/CJuVGo7dv5g=', // Valor Resumen 
+            ],
+            'user' => [
+                'header'     => 'Telf: <b>(01) 123375</b>', // Texto que se ubica debajo de la dirección de empresa
+                'extras'     => [
+                    // Leyendas adicionales
+                    ['name' => 'CONDICION DE PAGO', 'value' => 'Efectivo'     ],
+                    ['name' => 'VENDEDOR'         , 'value' => 'GITHUB SELLER'],
+                ],
+                'footer' => '<p>Nro Resolucion: <b>3232323</b></p>'
+            ]
+        ];
+
+        return $report->render($invoice, $params);
     }
 }
