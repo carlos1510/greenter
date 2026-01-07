@@ -6,12 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Services\SunatService;
 
-use Greenter\Model\Client\Client;
-use Greenter\Model\Company\Address;
-use Greenter\Model\Company\Company as ModelCompany;
-
-use Greenter\Model\Sale\Legend;
-use Greenter\Model\Sale\SaleDetail;
 use Greenter\Report\XmlUtils;
 use Illuminate\Http\Request;
 use Luecano\NumeroALetras\NumeroALetras;
@@ -21,6 +15,14 @@ class InvoiceController extends Controller
 {
     public function send(Request $request)
     {
+        $request->validate([
+            'company' => 'required|array',
+            'company.address' => 'required|array',
+            'client' => 'required|array',
+            'details' => 'required|array',
+            'details.*' => 'required|array',
+        ]);
+
         $data = $request->all();
         
         $company = Company::where('user_id', JWTAuth::user()->id)
