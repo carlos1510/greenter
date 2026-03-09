@@ -8,11 +8,14 @@ use App\Services\SunatService;
 
 use Greenter\Report\XmlUtils;
 use Illuminate\Http\Request;
-use Luecano\NumeroALetras\NumeroALetras;
 use Tymon\JWTAuth\Facades\JWTAuth;
+
+use App\Traits\SunatTrait;
 
 class InvoiceController extends Controller
 {
+    use SunatTrait;
+
     public function send(Request $request)
     {
         $request->validate([
@@ -104,36 +107,4 @@ class InvoiceController extends Controller
         return $sunat->getHtmlReport($invoice);
     }
 
-    public function setTotales(&$data) {
-        $details = collect($data['details']);
-
-        $data['mtoOperGravadas'] = $details->where('tipAfeIgv', 10)->sum('mtoValorVenta');
-        $data['mtoOperExoneradas'] = $details->where('tipAfeIgv', 20)->sum('mtoValorVenta');
-        $data['mtoOperInafectas'] = $details->where('tipAfeIgv', 30)->sum('mtoValorVenta');
-        $data['mtoOperExportacion'] = $details->where('tipAfeIgv', 40)->sum('mtoValorVenta');
-        $data['mtoOperGratuitas'] = $details->whereNotIn('tipAfeIgv', [10, 20, 30, 40])->sum('mtoValorVenta');
-
-        $data['mtoIGV'] = $details->whereIn('tipAfeIgv', [10, 20, 30, 40])->sum('igv');
-        $data['mtoIGVGratuitas'] = $details->whereNotIn('tipAfeIgv', [10, 20, 30, 40])->sum('igv');
-        $data['icbper'] = $details->sum('icbper');
-        $data['totalImpuestos'] = $data['mtoIGV'] + $data['icbper'];
-
-        $data['valorVenta'] = $details->whereIn('tipAfeIgv', [10, 20, 30, 40])->sum('mtoValorVenta');
-        $data['subTotal'] = $details->sum('mtoValorVenta') + $data['mtoIGV'];
-
-        $data['mtoImpVenta'] = floor($data['subTotal']*10) / 10;
-
-        $data['redondeo'] = $data['mtoImpVenta'] - ($data['subTotal']);
-    }
-
-    public function setLegends(&$data){
-        $formatter = new NumeroALetras();
-
-        $data['legends'] = [
-            [
-                'code' => '1000',
-                'value' => $formatter->toInvoice($data['mtoImpVenta'], 2, 'SOLES')
-            ]
-        ];
-    }
 }
